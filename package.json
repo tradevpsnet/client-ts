@@ -1,0 +1,42 @@
+{
+  "name": "@tradevpsnet/client",
+  "version": "1.0.0",
+  "description": "The official TypeScript client for TradeVPS APIs, services, and marketplace.",
+  "main": "dist/client.js",
+  "types": "dist/client.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    }
+  },
+  "require": {
+    "commonjs": "./dist/client.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tradevpsnet/client-ts.git"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Aryan Aghf"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tradevpsnet/client-ts/issues"
+  },
+  "homepage": "https://github.com/tradevpsnet/client-ts#readme",
+  "devDependencies": {
+    "axios": "^1.9.0",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}
