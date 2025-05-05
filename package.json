@@ -28,7 +28,7 @@
   "author": {
     "name": "Aryan Aghf"
   },
-  "license": "ISC",
+  "license": "Apache-2.0",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/tradevpsnet/client-ts/issues"
