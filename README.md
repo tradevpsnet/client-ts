@@ -11,7 +11,7 @@ npm i @tradevpsnet/client
 ```
 #### Example usage
 ```js
-import { Client } from 'client-ts';
+import { Client } from '@tradevpsnet/client';
 
 const client = new Client();
 
