@@ -16,7 +16,7 @@ import { Client } from 'client-ts';
 const client = new Client();
 
 try {
-    const loginResponse = await client.auth.login({ "user@example.com", "password123" });
+    const loginResponse = await client.auth.login({ email: "user@example.com", password: "password123" });
     console.log('Login successful:', loginResponse);
 } catch (error) {
       console.error('Login failed:', error);
