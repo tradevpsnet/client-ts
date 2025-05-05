@@ -7,9 +7,10 @@ import {
   LoginValidationError,
 } from './errors';
 import { Auth } from '../auth';
+import { APIError } from '../../exception';
 
 export class Login {
-  constructor(private auth: Auth) {}
+  constructor(private auth: Auth) { }
 
 
   async execute({ email, password }: ILoginParams): Promise<ILoginResponse> {
@@ -27,19 +28,21 @@ export class Login {
       return response.data as ILoginResponse;
     } catch (error: any) {
       const status = error?.status;
-
-      switch (status) {
-        case 400:
-          throw new LoginValidationError(error.message || 'Invalid request');
-        case 401:
-          throw new LoginUnauthorizedError(error.message || 'Unauthorized');
-        case 404:
-          throw new LoginNotFoundError(error.message || 'Not found');
-        case 500:
-          throw new LoginServerError(error.message || 'Server error');
-        default:
-          throw new LoginError(error.message || 'Unexpected error');
+      if (error instanceof APIError) {
+        switch (status) {
+          case 400:
+            throw new LoginValidationError(error.message || 'Invalid request');
+          case 401:
+            throw new LoginUnauthorizedError(error.message || 'Unauthorized');
+          case 404:
+            throw new LoginNotFoundError(error.message || 'Not found');
+          case 500:
+            throw new LoginServerError(error.message || 'Server error');
+          default:
+            throw new LoginError(error.message || 'Unexpected error');
+        }
       }
+      throw new LoginError(error.message || 'An unexpected error occurred');
     }
   }
 }

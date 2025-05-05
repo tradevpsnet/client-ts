@@ -1,5 +1,5 @@
 export type IResponse = {
   success: boolean;
-  message: string;
+  msg: string;
   data?: Record<string, unknown>;
 }

@@ -7,9 +7,10 @@ import {
   LogoutValidationError,
 } from './errors';
 import { Auth } from '../auth';
+import { APIError } from '../../exception';
 
 export class Logout {
-  constructor(private auth: Auth) {}
+  constructor(private auth: Auth) { }
 
   async execute(): Promise<ILogoutResponse> {
     try {
@@ -25,19 +26,21 @@ export class Logout {
       return response.data as ILogoutResponse;
     } catch (error: any) {
       const status = error?.status;
-
-      switch (status) {
-        case 400:
-          throw new LogoutValidationError(error.message || 'Invalid request');
-        case 401:
-          throw new LogoutUnauthorizedError(error.message || 'Unauthorized');
-        case 404:
-          throw new LogoutNotFoundError(error.message || 'Not found');
-        case 500:
-          throw new LogoutServerError(error.message || 'Server error');
-        default:
-          throw new LogoutError(error.message || 'Unexpected error');
+      if (error instanceof APIError) {
+        switch (status) {
+          case 400:
+            throw new LogoutValidationError(error.message || 'Invalid request');
+          case 401:
+            throw new LogoutUnauthorizedError(error.message || 'Unauthorized');
+          case 404:
+            throw new LogoutNotFoundError(error.message || 'Not found');
+          case 500:
+            throw new LogoutServerError(error.message || 'Server error');
+          default:
+            throw new LogoutError(error.message || 'Unexpected error');
+        }
       }
+      throw new LogoutError(error.message || 'An unexpected error occurred');
     }
   }
 }

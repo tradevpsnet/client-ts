@@ -7,9 +7,10 @@ import {
   ResetPasswordValidationError,
 } from './errors';
 import { Auth } from '../auth';
+import { APIError } from '../../exception';
 
 export class ResetPassword {
-  constructor(private auth: Auth) {}
+  constructor(private auth: Auth) { }
 
   async execute({
     email,
@@ -36,19 +37,21 @@ export class ResetPassword {
       return response.data as IResetPasswordResponse;
     } catch (error: any) {
       const status = error?.status;
-
-      switch (status) {
-        case 400:
-          throw new ResetPasswordValidationError(error.message || 'Validation error');
-        case 401:
-          throw new ResetPasswordUnauthorizedError(error.message || 'Unauthorized');
-        case 404:
-          throw new ResetPasswordNotFoundError(error.message || 'User not found');
-        case 500:
-          throw new ResetPasswordServerError(error.message || 'Server error');
-        default:
-          throw new ResetPasswordError(error.message || 'Unexpected error');
+      if (error instanceof APIError) {
+        switch (status) {
+          case 400:
+            throw new ResetPasswordValidationError(error.message || 'Validation error');
+          case 401:
+            throw new ResetPasswordUnauthorizedError(error.message || 'Unauthorized');
+          case 404:
+            throw new ResetPasswordNotFoundError(error.message || 'User not found');
+          case 500:
+            throw new ResetPasswordServerError(error.message || 'Server error');
+          default:
+            throw new ResetPasswordError(error.message || 'Unexpected error');
+        }
       }
+      throw new ResetPasswordError(error.message || 'An unexpected error occurred');
     }
   }
 }

@@ -7,9 +7,10 @@ import {
   RegisterValidationError,
 } from './errors';
 import { Auth } from '../auth';
+import { APIError } from '../../exception';
 
 export class Register {
-  constructor(private auth: Auth) {}
+  constructor(private auth: Auth) { }
 
   async execute({ name, email, password }: IRegisterParams): Promise<IRegisterResponse> {
     try {
@@ -26,19 +27,21 @@ export class Register {
       return response.data as IRegisterResponse;
     } catch (error: any) {
       const status = error?.status;
-
-      switch (status) {
-        case 400:
-          throw new RegisterValidationError(error.message || 'Invalid request');
-        case 401:
-          throw new RegisterUnauthorizedError(error.message || 'Unauthorized');
-        case 404:
-          throw new RegisterNotFoundError(error.message || 'Not found');
-        case 500:
-          throw new RegisterServerError(error.message || 'Server error');
-        default:
-          throw new RegisterError(error.message || 'Unexpected error');
+      if (error instanceof APIError) {
+        switch (status) {
+          case 400:
+            throw new RegisterValidationError(error.message || 'Invalid request');
+          case 401:
+            throw new RegisterUnauthorizedError(error.message || 'Unauthorized');
+          case 404:
+            throw new RegisterNotFoundError(error.message || 'Not found');
+          case 500:
+            throw new RegisterServerError(error.message || 'Server error');
+          default:
+            throw new RegisterError(error.message || 'Unexpected error');
+        }
       }
+      throw new RegisterError(error.message || 'An unexpected error occurred');
     }
   }
 }

@@ -51,7 +51,7 @@ export class BaseClient implements IRequest {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new APIError(
-          error.response?.data?.message || 'Unknown error',
+          error.response?.data?.msg || 'Unknown error',
           error.response?.status
         );
       }
@@ -71,3 +71,5 @@ export class Client extends BaseClient {
     return this._auth;
   }
 };
+export * from './types/index';
+export {APIError};
