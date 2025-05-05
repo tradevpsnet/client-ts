@@ -8,3 +8,7 @@ export { IRegisterResponse } from './auth/register';
 export { ILoginParams } from './auth/login';
 export { ILoginResponse } from './auth/login';
 export { ILogoutResponse } from './auth/logout';
+export { IDailyNewsParams } from './ai/news/daily-analysis';
+export { IDailyNewsResponse } from './ai/news/daily-analysis';
+export { IWeeklyNewsParams } from './ai/news/weekly-analysis';
+export { IWeeklyNewsResponse } from './ai/news/weekly-analysis';

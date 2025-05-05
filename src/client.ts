@@ -8,6 +8,7 @@ import {
   ResponseData
 } from './types/request';
 import { Auth } from './modules/auth/auth';
+import { AI } from './modules/ai/ai';
 
 export class BaseClient implements IRequest {
   private baseUrl: string;
@@ -63,6 +64,7 @@ export class BaseClient implements IRequest {
 
 export class Client extends BaseClient {
   private _auth?: Auth;
+  private _ai?: AI;
 
   get auth(): Auth {
     if (!this._auth) {
@@ -70,6 +72,12 @@ export class Client extends BaseClient {
     }
     return this._auth;
   }
+  get ai(): AI {
+    if (!this._ai) {
+      this._ai = new AI(this);
+    }
+    return this._ai;
+  }
 };
 export * from './types/index';
-export {APIError};
+export { APIError };
