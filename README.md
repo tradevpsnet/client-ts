@@ -22,6 +22,25 @@ try {
       console.error('Login failed:', error);
 }
 ````
+### ✅ Currently Supported Methods
+#### 🔐 Authentication
+```js
+client.auth.login(params)
+
+client.auth.register(params)
+
+client.auth.logout()
+
+client.auth.forget_password(params)
+
+client.auth.reset_password(params)
+````
+#### 🧠 AI Analysis
+```js
+client.ai.news.dailyAnalysis(params)
+client.ai.news.weeklyAnalysis(params)
+```
+
 ### 📄 Types
 
 To ensure type safety when using the client library, you can import request and response types directly:
@@ -37,6 +56,10 @@ import {
   IResetPasswordResponse,
   ILogoutResponse,
   IResponse
+  IDailyNewsParams 
+  IDailyNewsResponse
+  IWeeklyNewsParams 
+  IWeeklyNewsResponse 
 } from '@tradevpsnet/client';
 ```
 These types cover the authentication flows and ensure you're developing with full TypeScript support.

@@ -19,7 +19,7 @@ export class WeeklyNews {
     try {
       const response = await this.news.ai.client._request({
         method: 'POST',
-        endpoint: '/news/weekly-news',
+        endpoint: '/news/weekly-analysis',
         data: params,
       });
 
