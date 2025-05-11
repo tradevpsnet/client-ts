@@ -63,6 +63,19 @@ import {
 } from '@tradevpsnet/client';
 ```
 These types cover the authentication flows and ensure you're developing with full TypeScript support.
+### ⚠️ Flags
+This library depends on [@tradevpsnet/flags](https://www.npmjs.com/package/@tradevpsnet/flags)
+ ```js
+ import { Client } from '@tradevpsnet/client';
+
+const client = new Client();
+ const [GbpFlag] = client.flags.get('gbp');
+ return(
+  <div>
+    {GbpFlag ? <GbpFlag width={20} height={20} /> : 'No flag found'}`.
+ </div>
+ );
+```
 ### ⚠️ Error Handling
 
 All errors returned from the authentication system are instances of APIError, a custom error class for handling TradeVPS-specific failures.
