@@ -7,11 +7,15 @@ export class TradeVPSException extends Error {
       }
   }
 }
+
 export class APIError extends TradeVPSException {
   public statusCode?: number;
-  constructor(msg: string, statusCode?: number) {
-      super(msg);
-      this.name = 'APIError';
-      this.statusCode = statusCode;
+  public responseData?: any;
+
+  constructor(msg: string, statusCode?: number, responseData?: any) {
+    super(msg);
+    this.name = 'APIError';
+    this.statusCode = statusCode;
+    this.responseData = responseData;
   }
 }

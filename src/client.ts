@@ -9,6 +9,7 @@ import {
 } from './types/request';
 import { Auth } from './modules/auth/auth';
 import { AI } from './modules/ai/ai';
+import { Flags } from './modules/flags/flags';
 
 export class BaseClient implements IRequest {
   private baseUrl: string;
@@ -48,13 +49,24 @@ export class BaseClient implements IRequest {
 
     try {
       const response: AxiosResponse<T> = await this._session.request(axiosConfig);
+      const res = response.data as any;
+      if (res?.ok === false) {
+        throw new APIError(res.message || 'Unknown API error', response.status, res);
+      }
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new APIError(
-          error.response?.data?.msg || 'Unknown error',
-          error.response?.status
-        );
+        const status = error.response?.status;
+        const msg = error.response?.data?.msg;
+        const data = error.response?.data;
+        let message = 'Unkown Error';
+        if (msg) {
+          message = msg;
+        } else {
+          message =
+            data?.message || error.message || 'HTTP error';
+        }
+        throw new APIError(message, status, data);
       }
       throw new APIError('Network error');
     }
@@ -77,6 +89,14 @@ export class Client extends BaseClient {
       this._ai = new AI(this);
     }
     return this._ai;
+  }
+  private _flags?: Flags;
+
+  get flags(): Flags {
+    if (!this._flags) {
+      this._flags = new Flags();
+    }
+    return this._flags;
   }
 };
 export * from './types/index';
