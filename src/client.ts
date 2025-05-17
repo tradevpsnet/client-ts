@@ -11,6 +11,7 @@ import { Auth } from './modules/auth/auth';
 import { AI } from './modules/ai/ai';
 import { Flags } from './modules/flags/flags';
 import { Windows } from './modules/windows/windows';
+import { Projects } from './modules/projects/projects';
 
 export class BaseClient implements IRequest {
   private baseUrl: string;
@@ -80,6 +81,7 @@ export class Client extends BaseClient {
   private _ai?: AI;
   private _flags?: Flags;
   private _windows?: Windows;
+  private _projects?: Projects;
 
   get auth(): Auth {
     if (!this._auth) {
@@ -105,6 +107,12 @@ export class Client extends BaseClient {
       this._windows = new Windows(this);
     }
     return this._windows;
+  }
+  get projects(): Projects {
+    if (!this._projects) {
+      this._projects = new Projects(this);
+    }
+    return this._projects;
   }
 };
 export * from './types/index';

@@ -49,6 +49,11 @@ client.windows.regions()
 client.windows.server_detail(id)
 client.widnows.server_delete(id)
 ```
+####  Projects
+```js
+client.projects.projects_list(query)
+client.projects.project_deploy(payload)
+```
 ### 📄 Types
 
 To ensure type safety when using the client library, you can import request and response types directly:
@@ -77,7 +82,11 @@ import {
   IServerDeployResponse,
   IServerDetailResponse,
   IServerListQueryParams,
-  IListServersResponse
+  IListServersResponse,
+  IProjectCreateParams,
+  IProjectCreateResponse,
+  IProjectListQueryParams,
+  IListProjectsResponse
 } from '@tradevpsnet/client';
 ```
 These types cover the authentication flows and ensure you're developing with full TypeScript support.
