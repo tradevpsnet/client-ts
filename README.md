@@ -40,7 +40,15 @@ client.auth.reset_password(params)
 client.ai.news.dailyAnalysis(params)
 client.ai.news.weeklyAnalysis(params)
 ```
-
+####  Windows Server
+```js
+client.windows.servers_list(query)
+client.windows.server_deploy(payload)
+client.windows.server_action(id, params)
+client.windows.regions()
+client.windows.server_detail(id)
+client.widnows.server_delete(id)
+```
 ### 📄 Types
 
 To ensure type safety when using the client library, you can import request and response types directly:
@@ -55,11 +63,21 @@ import {
   IResetPasswordParams,
   IResetPasswordResponse,
   ILogoutResponse,
-  IResponse
-  IDailyNewsParams 
-  IDailyNewsResponse
-  IWeeklyNewsParams 
-  IWeeklyNewsResponse 
+  IResponse,
+  IDailyNewsParams, 
+  IDailyNewsResponse,
+  IWeeklyNewsParams, 
+  IWeeklyNewsResponse,
+  IRegionsResponse,
+  IRegionsParams,
+  IRegion,
+  IServerActionParams,
+  IServerActionResponse,
+  IServerDeployParams,
+  IServerDeployResponse,
+  IServerDetailResponse,
+  IServerListQueryParams,
+  IListServersResponse
 } from '@tradevpsnet/client';
 ```
 These types cover the authentication flows and ensure you're developing with full TypeScript support.
