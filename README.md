@@ -54,6 +54,20 @@ client.widnows.server_delete(id)
 client.projects.projects_list(query)
 client.projects.project_deploy(payload)
 ```
+### Calender
+Read the [document](https://docs.tradevps.net/apis/marketplace/calendar) for more detail
+```js
+const query = {
+        date_from: '2025-05-10',
+        date_to: '2025-05-15',
+        importance: '3',
+        country: 'IR',
+        per_page: 15,
+        sort_by: 'time',
+        sort_direction: 'asc',
+      };
+client.marketplace.calender(query);
+```
 ### 📄 Types
 
 To ensure type safety when using the client library, you can import request and response types directly:
@@ -86,10 +100,13 @@ import {
   IProjectCreateParams,
   IProjectCreateResponse,
   IProjectListQueryParams,
-  IListProjectsResponse
+  IListProjectsResponse,
+  ICalendarQueryParams,
+  ICalendarEvent,
+  ICalendarResponse
 } from '@tradevpsnet/client';
 ```
-These types cover the authentication flows and ensure you're developing with full TypeScript support.
+These types cover the implementation flows and ensure you're developing with full TypeScript support.
 ### ⚠️ Flags
 This library depends on [@tradevpsnet/flags](https://www.npmjs.com/package/@tradevpsnet/flags)
  ```js
@@ -105,7 +122,7 @@ const client = new Client();
 ```
 ### ⚠️ Error Handling
 
-All errors returned from the authentication system are instances of APIError, a custom error class for handling TradeVPS-specific failures.
+All errors returned from the client system are instances of APIError, a custom error class for handling TradeVPS-specific failures.
 ```js
 import { APIError } from '@tradevpsnet/client';
 

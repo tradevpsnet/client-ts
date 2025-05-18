@@ -27,3 +27,6 @@ export { IProjectCreateParams } from './projects/project-deploy';
 export { IProjectCreateResponse } from './projects/project-deploy';
 export { IProjectListQueryParams } from './projects/projects-list';
 export { IListProjectsResponse } from './projects/projects-list';
+export { ICalendarQueryParams} from './marketplace/calender';
+export { ICalendarEvent} from './marketplace/calender';
+export { ICalendarResponse} from './marketplace/calender';

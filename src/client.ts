@@ -12,6 +12,7 @@ import { AI } from './modules/ai/ai';
 import { Flags } from './modules/flags/flags';
 import { Windows } from './modules/windows/windows';
 import { Projects } from './modules/projects/projects';
+import { Marketplace } from './modules/marketplace/marketplace';
 
 export class BaseClient implements IRequest {
   private baseUrl: string;
@@ -82,6 +83,7 @@ export class Client extends BaseClient {
   private _flags?: Flags;
   private _windows?: Windows;
   private _projects?: Projects;
+  private _marketplace?: Marketplace;
 
   get auth(): Auth {
     if (!this._auth) {
@@ -113,6 +115,12 @@ export class Client extends BaseClient {
       this._projects = new Projects(this);
     }
     return this._projects;
+  }
+  get marketplace(): Marketplace {
+    if (!this._marketplace) {
+      this._marketplace = new Marketplace(this);
+    }
+    return this._marketplace;
   }
 };
 export * from './types/index';
