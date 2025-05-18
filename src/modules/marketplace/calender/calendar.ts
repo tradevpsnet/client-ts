@@ -1,7 +1,7 @@
 import type {
   ICalendarQueryParams,
   ICalendarResponse,
-} from '../../../types/marketplace/calender';
+} from '../../../types/marketplace/calendar';
 
 import {
   CalendarError,
@@ -26,7 +26,7 @@ function buildQueryParams(params: ICalendarQueryParams): string {
 }
 
 export class Calendar {
-  constructor(private marketplace: Marketplace) {}
+  constructor(private marketplace: Marketplace) { }
 
   async fetch(params: ICalendarQueryParams = {}): Promise<ICalendarResponse> {
     try {
