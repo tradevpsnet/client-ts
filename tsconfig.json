@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "jsx": "react",
+    "target": "es2019",
+    "lib": ["es2019", "dom"],
     "module": "CommonJS",
     "declaration": true,
     "outDir": "dist",

@@ -124,4 +124,5 @@ export class Client extends BaseClient {
   }
 };
 export * from './types/index';
+export { default as EconomicCalendar } from './modules/marketplace/component/calender'
 export { APIError };

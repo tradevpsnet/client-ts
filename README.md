@@ -68,6 +68,25 @@ const query = {
       };
 client.marketplace.calender(query);
 ```
+You can also use our pre-made component for showing calender data
+```js
+'use client';
+import {Client} from '@tradevpsnet/client';
+import {EconomicCalendar} from '@tradevpsnet/client';
+import React, {useMemo} from 'react';
+
+const EconomicCalendarPage: React.FC = () => {
+  const client = useMemo(() => new Client(), []);
+
+  return (
+    <div className='w-full h-screen overflow-hidden'>
+      <EconomicCalendar client={client} width='100%' height='100%' />
+    </div>
+  );
+};
+export default EconomicCalendarPage;
+
+```
 ### 📄 Types
 
 To ensure type safety when using the client library, you can import request and response types directly:
