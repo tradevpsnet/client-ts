@@ -1,5 +1,5 @@
-import {useState, useMemo, useEffect} from 'react';
-import {EventTypeMap, Importance, ImportanceMap, MultiplierMap, SectorMap, UnitMap} from './list';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { EventTypeMap, Importance, ImportanceMap, MultiplierMap, SectorMap, UnitMap } from './list';
 import { ICalendarQueryParams, ICalendarResponse } from '../../../types';
 import React from 'react';
 import { Client } from '../../../client';
@@ -9,30 +9,47 @@ type IEconomicCalendarProps = {
   height?: string;
   client: Client;
 };
-const ImportanceIndicator = ({level}: {level: Importance}) => {
+const importanceColors: Record<number, string> = {
+  0: '#9CA3AF',
+  1: '#60A5FA',
+  2: '#FBBF24',
+  3: '#F87171',
+};
+type Props = {
+  level: Importance;
+}
+const ImportanceIndicator: React.FC<Props> = ({ level }) => {
   const barCount = 4;
-  const activeBars = level; // assuming 0-3
-  const colors = {
-    [Importance.NONE]: 'bg-gray-400',
-    [Importance.LOW]: 'bg-blue-400',
-    [Importance.MODERATE]: 'bg-amber-400',
-    [Importance.HIGH]: 'bg-red-400'
-  };
+  const activeColor = importanceColors[level];
 
   return (
-    <div className='flex items-end gap-[2px] w-5 h-4'>
-      {[...Array(barCount)].map((_, i) => (
+    <div
+      style={{
+        display: 'flex',
+        gap: '2px',
+        width: '20px',
+        height: '12px',
+        alignItems: 'flex-end'
+      }}
+    >
+      {Array.from({ length: barCount }, (_, i) => (
         <div
           key={i}
-          className={`w-[3px] rounded-sm ${i < activeBars ? colors[level] : 'bg-slate-600'}`}
-          style={{height: `${(i + 1) * 4}px`}}
+          style={{
+            width: '3px',
+            height: '100%',
+            backgroundColor: i <= level ? activeColor : '#374151',
+            borderRadius: '1px'
+          }}
         />
       ))}
     </div>
   );
 };
 
-const EconomicCalendar = ({ width = '400px', height = '550px', client}: IEconomicCalendarProps) => {
+
+
+const EconomicCalendar = ({ width = '400px', height = '550px', client }: IEconomicCalendarProps) => {
   const [startDate, setStartDate] = useState<Date>(() => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
@@ -189,34 +206,53 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client}: IEconomi
   };
   const renderMultiSelectFilter = (
     label: string,
-    options: {value: number; label: string}[],
+    options: { value: number; label: string }[],
     selected: number[],
     setSelected: (val: number[]) => void
-  ) => (
-    <div className='relative group'>
-      <button className='px-3 py-1 bg-slate-700 rounded-md text-slate-300 hover:bg-slate-600'>{label} ▼</button>
-      <div className='absolute hidden group-hover:block bg-slate-800 p-2 rounded-md shadow-lg z-10 w-max'>
-        {options.map((option) => (
-          <label key={option.value} className='flex items-center gap-2 whitespace-nowrap text-sm text-slate-300'>
-            <input
-              type='checkbox'
-              checked={selected.includes(option.value)}
-              onChange={(e) => {
-                const newSelected = e.target.checked
-                  ? [...selected, option.value]
-                  : selected.filter((v) => v !== option.value);
-                setSelected(newSelected);
-              }}
-              className='form-checkbox h-4 w-4 text-blue-600'
-            />
-            {option.label}
-          </label>
-        ))}
+  ) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (ref.current && !ref.current.contains(event.target as Node)) {
+          setIsOpen(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+      <div className='relative group'>
+        <button onClick={() => setIsOpen(!isOpen)}
+          className='px-3 py-1 bg-slate-700 rounded-md text-slate-300 hover:bg-slate-600'>{label} ▼</button>
+        {isOpen && (
+          <div className='absolute bg-slate-800 p-2 rounded-md shadow-lg z-10 w-max'>
+            {options.map((option) => (
+              <label key={option.value} className='flex items-center gap-2 whitespace-nowrap text-sm text-slate-300'>
+                <input
+                  type='checkbox'
+                  checked={selected.includes(option.value)}
+                  onChange={(e) => {
+                    const newSelected = e.target.checked
+                      ? [...selected, option.value]
+                      : selected.filter((v) => v !== option.value);
+                    setSelected(newSelected);
+                  }}
+                  className='form-checkbox h-4 w-4 text-blue-600'
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
   return (
-    <div className='bg-slate-900 rounded-lg border border-slate-700 shadow-lg overflow-hidden' style={{width, height}}>
+    <div className='bg-slate-900 rounded-lg border border-slate-700 shadow-lg overflow-hidden' style={{ width, height }}>
       {isPending && (
         <div className='absolute inset-0 bg-slate-900/50 flex items-center justify-center z-50'>
           <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' />
@@ -224,7 +260,7 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client}: IEconomi
       )}
       <div className='flex items-center justify-between mb-4 p-4 gap-4'>
         <div className='flex items-center gap-2'>
-        <button
+          <button
             onClick={() => handleTimeNavigation('previous')}
             className='p-2 hover:bg-slate-700 text-gray-400 rounded disabled:opacity-50'
             disabled={isPending}>
@@ -257,27 +293,26 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client}: IEconomi
         </div>
       </div>
       <div className='p-4 space-y-4' aria-busy={isPending}>
-        <div className='flex gap-2' style={{opacity: isPending ? 0.5 : 1}}>
+        <div className='flex gap-2' style={{ opacity: isPending ? 0.5 : 1 }}>
           {[
-            {label: 'همه', levels: [Importance.LOW, Importance.MODERATE, Importance.HIGH]},
-            {label: ImportanceMap[Importance.HIGH].label, levels: [Importance.HIGH]},
-            {label: ImportanceMap[Importance.MODERATE].label, levels: [Importance.MODERATE]},
-            {label: ImportanceMap[Importance.LOW].label, levels: [Importance.LOW]}
+            { label: 'همه', levels: [Importance.LOW, Importance.MODERATE, Importance.HIGH] },
+            { label: ImportanceMap[Importance.HIGH].label, levels: [Importance.HIGH] },
+            { label: ImportanceMap[Importance.MODERATE].label, levels: [Importance.MODERATE] },
+            { label: ImportanceMap[Importance.LOW].label, levels: [Importance.LOW] }
           ].map((filter) => (
             <button
               key={filter.label}
               onClick={() => setSelectedImportance(filter.levels)}
-              className={`px-3 py-1 rounded-md text-sm ${
-                selectedImportance.join() === filter.levels.join()
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-              }`}>
+              className={`px-3 py-1 rounded-md text-sm ${selectedImportance.join() === filter.levels.join()
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}>
               {filter.label}
             </button>
           ))}
         </div>
         {/* Calendar Header */}
-        <div className='flex flex-wrap gap-2 mt-4' style={{opacity: isPending ? 0.5 : 1}}>
+        <div className='flex flex-wrap gap-2 mt-4' style={{ opacity: isPending ? 0.5 : 1 }}>
           {renderMultiSelectFilter(
             'واحد',
             Object.entries(UnitMap).map(([value, labelObj]) => ({
@@ -290,27 +325,27 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client}: IEconomi
 
           {renderMultiSelectFilter(
             'نوع رویداد',
-            Object.entries(EventTypeMap).map(([value, labelObj]) => ({value: Number(value), label: labelObj.label})),
+            Object.entries(EventTypeMap).map(([value, labelObj]) => ({ value: Number(value), label: labelObj.label })),
             selectedEvents,
             setSelectedEvents
           )}
 
           {renderMultiSelectFilter(
             'بخش',
-            Object.entries(SectorMap).map(([value, labelObj]) => ({value: Number(value), label: labelObj.label})),
+            Object.entries(SectorMap).map(([value, labelObj]) => ({ value: Number(value), label: labelObj.label })),
             selectedSectors,
             setSelectedSectors
           )}
           {renderMultiSelectFilter(
             'ضریب',
-            Object.entries(MultiplierMap).map(([value, labelObj]) => ({value: Number(value), label: labelObj.label})),
+            Object.entries(MultiplierMap).map(([value, labelObj]) => ({ value: Number(value), label: labelObj.label })),
             selectedMultiplier,
             setSelectedMultiplier
           )}
         </div>
       </div>
       {/* Calendar Body */}
-      <div className='overflow-y-auto' style={{height: `calc(${height} - 120px)`}}>
+      <div className='overflow-y-auto' style={{ height: `calc(${height} - 120px)` }}>
         <table className='w-full'>
           <thead className='bg-slate-800 text-slate-300 text-xs sticky top-0'>
             <tr>
@@ -323,8 +358,12 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client}: IEconomi
             </tr>
           </thead>
           <tbody>
-            {response?.data?.map((event) => (
-              <tr key={event.id} className='border-b border-slate-700 hover:bg-slate-800 even:bg-slate-800/50'>
+            {response?.data?.map((event, index) => (
+              <tr
+                key={event.id}
+                className={`border-b border-slate-700 hover:bg-slate-800 ${index % 2 === 1 ? 'bg-slate-800/50' : ''
+                  }`}
+              >
                 <td className='p-3 text-slate-400 text-sm'>{formatTime(event.time)}</td>
                 <td className='p-3'>
                   <div className='flex items-center gap-2 justify-start'>
