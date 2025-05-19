@@ -5,8 +5,13 @@ import { EmptyInputError } from './errors';
 const COUNTRY_ALIASES: Record<string, string> = {
   usd: 'us',
   usdt: 'us',
+  ust: 'us',
   us: 'us',
   eur: 'eu',
+  euro: 'eu',
+  eurozone: 'eu',
+  emu: 'eu',
+  eu: 'eu',
   gbp: 'gb',
   jpy: 'jp',
   aud: 'au',
@@ -14,8 +19,12 @@ const COUNTRY_ALIASES: Record<string, string> = {
   chf: 'ch',
   cny: 'cn',
   inr: 'in',
-  ust: 'us',
+  all: 'un',
+  world: 'un',
+  g7: 'un',
+  g20: 'un',
 };
+
 
 function formatCode(code: string): string {
   const lowerCode = code.toLowerCase();
