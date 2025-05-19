@@ -1,27 +1,28 @@
 import React from "react";
 import { Importance } from "./list";
 
-const importanceColors: Record<number, string> = {
-  0: '#9CA3AF',
-  1: '#60A5FA',
-  2: '#FBBF24',
-  3: '#F87171',
+const importanceColors: Record<Importance, string> = {
+  0: '#4B5563',     // Gray (none)
+  1: '#FBBF24',     // Yellow
+  2: '#FB923C',     // Orange
+  3: '#EF4444',     // Red
 };
+
 type Props = {
   level: Importance;
-}
+};
+
 export const ImportanceIndicator: React.FC<Props> = ({ level }) => {
-  const barCount = 4;
-  const activeColor = importanceColors[level];
+  const barCount = 3;
 
   return (
     <div
       style={{
         display: 'flex',
         gap: '2px',
-        width: '20px',
+        width: '16px',
         height: '12px',
-        alignItems: 'flex-end'
+        alignItems: 'flex-end',
       }}
     >
       {Array.from({ length: barCount }, (_, i) => (
@@ -30,8 +31,8 @@ export const ImportanceIndicator: React.FC<Props> = ({ level }) => {
           style={{
             width: '3px',
             height: '100%',
-            backgroundColor: i <= level ? activeColor : '#374151',
-            borderRadius: '1px'
+            backgroundColor: level > 0 && i < level ? importanceColors[level] : '#4B5563',
+            borderRadius: '1px',
           }}
         />
       ))}
