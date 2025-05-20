@@ -161,7 +161,7 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
     }));
   };
   return (
-    <div className="flex gap-4 w-full" style={{ height }}>
+    <div className="flex gap-4 w-full"   dir={lang === 'fa' ? 'rtl' : 'ltr'} style={{ height }}>
       <FiltersSidebar
         selectedImportance={selectedImportance}
         setSelectedImportance={setSelectedImportance}
@@ -201,13 +201,13 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
           <table className='w-full'>
             <thead className='bg-slate-800 z-10 text-slate-300 text-xs sticky top-0'>
               <tr>
-                <th className='p-3 text-right'>{t('time')}</th>
-                <th className='p-3 text-right'>{t('status')}</th>
-                <th className='p-3 text-right'>{t('currency')}</th>
-                <th className='p-3 text-right'>{t('event')}</th>
-                <th className='p-3 text-right'>{t('actual')}</th>
-                <th className='p-3 text-right'>{t('forecast')}</th>
-                <th className='p-3 text-right'>{t('previous')}</th>
+                <th className='p-3 text-center'>{t('time')}</th>
+                <th className='p-3 text-center'>{t('status')}</th>
+                <th className='p-3 text-start'>{t('currency')}</th>
+                <th className='p-3 text-start'>{t('event')}</th>
+                <th className='p-3 text-center'>{t('actual')}</th>
+                <th className='p-3 text-center'>{t('forecast')}</th>
+                <th className='p-3 text-center'>{t('previous')}</th>
                 <th className='p-3 text-center'>{t('details')}</th>
               </tr>
             </thead>
@@ -239,7 +239,7 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
 
 
                           {/* Time */}
-                          <td className="p-3 text-slate-400 text-sm">
+                          <td className="p-3 text-slate-400 text-sm text-center">
                             {formatTime(event.time, lang)}
                           </td>
                           {/* Status Column */}
@@ -284,17 +284,17 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
                           </td>
 
                           {/* Actual */}
-                          <td className="p-3 text-emerald-400 text-sm">
+                          <td className="p-3 text-emerald-400 text-sm text-center">
                             {event.actual || "-"}
                           </td>
 
                           {/* Forecast */}
-                          <td className="p-3 text-amber-400 text-sm">
+                          <td className="p-3 text-amber-400 text-sm text-center">
                             {event.forecast || "-"}
                           </td>
 
                           {/* Previous */}
-                          <td className="p-3 text-blue-400 text-sm">
+                          <td className="p-3 text-blue-400 text-sm text-center">
                             {event.previous || "-"}
                           </td>
 
