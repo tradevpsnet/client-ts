@@ -1,15 +1,17 @@
 import React from 'react';
+import { translations } from './translation';
 
 type TimeRange = 'today' | 'week' | 'month';
 
 interface TimeRangeSelectorProps {
-  selectedRange: string;
+  selectedRange: TimeRange;
   setSelectedRange: (range: TimeRange) => void;
   inputStart: Date;
   inputEnd: Date;
   setInputStart: (date: Date) => void;
   setInputEnd: (date: Date) => void;
   isPending: boolean;
+  lang?: 'en' | 'fa';
 }
 
 const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
@@ -20,80 +22,128 @@ const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
   setInputStart,
   setInputEnd,
   isPending,
+  lang = 'en',
 }) => {
-  const handleTimeNavigation = (direction: 'next' | 'previous') => {
-    const diff = inputEnd.getTime() - inputStart.getTime();
-    const newStart = new Date(inputStart.getTime() + (direction === 'next' ? diff : -diff));
-    const newEnd = new Date(inputEnd.getTime() + (direction === 'next' ? diff : -diff));
-    setInputStart(newStart);
-    setInputEnd(newEnd);
+  const t = (key: keyof typeof translations) => translations[key][lang];
+  const getWeekRange = (date: Date) => {
+    const start = new Date(date);
+    const dayOfWeek = start.getDay();
+    const diffToSaturday = dayOfWeek === 6 ? 0 : 6 - dayOfWeek;
+    start.setDate(start.getDate() - dayOfWeek);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    return { start, end };
+  };
+
+  const getMonthRange = (date: Date) => {
+    const start = new Date(date.getFullYear(), date.getMonth(), 1);
+    const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return { start, end };
   };
 
   const handleRangeChange = (range: TimeRange) => {
     setSelectedRange(range);
     const now = new Date();
-    let newStart = new Date();
 
     switch (range) {
-      case 'today':
-        newStart.setHours(0, 0, 0, 0);
-        break;
-      case 'week': {
-        const dayOfWeek = now.getDay(); // 0 (Sun) to 6 (Sat)
-        const diffToSaturday = dayOfWeek === 6 ? 0 : dayOfWeek + 1;
-        newStart.setDate(now.getDate() - diffToSaturday);
-        newStart.setHours(0, 0, 0, 0);
+      case 'today': {
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        setInputStart(start);
+        setInputEnd(new Date());
         break;
       }
-      case 'month':
-        newStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      case 'week': {
+        const { start, end } = getWeekRange(now);
+        setInputStart(start);
+        setInputEnd(end);
         break;
+      }
+      case 'month': {
+        const { start, end } = getMonthRange(now);
+        setInputStart(start);
+        setInputEnd(end);
+        break;
+      }
     }
-
-    setInputStart(newStart);
-    setInputEnd(now);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('fa-IR', {
+  const handleTimeNavigation = (direction: 'previous' | 'next') => {
+    const offset = direction === 'next' ? 1 : -1;
+
+    const adjustDate = (date: Date) => {
+      const newDate = new Date(date);
+      switch (selectedRange) {
+        case 'today':
+          newDate.setDate(newDate.getDate() + offset);
+          break;
+        case 'week':
+          newDate.setDate(newDate.getDate() + offset * 7);
+          break;
+        case 'month':
+          newDate.setMonth(newDate.getMonth() + offset);
+          break;
+      }
+      return newDate;
+    };
+
+    const newStart = adjustDate(inputStart);
+    const newEnd = adjustDate(inputEnd);
+
+    if (selectedRange === 'month') {
+      const { start, end } = getMonthRange(newStart);
+      setInputStart(start);
+      setInputEnd(end);
+    } else {
+      setInputStart(newStart);
+      setInputEnd(newEnd);
+    }
+  };
+
+  const formatDate = (date: Date, lang: 'en' | 'fa' = 'en') => {
+    const locale = lang === 'fa' ? 'fa-IR' : 'en-US';
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+      month: 'long',
+      day: 'numeric',
     });
   };
+  
 
   return (
-    <div className='flex items-center justify-between mb-4 p-4 gap-4'>
-      <div className='flex items-center gap-2'>
+    <div className="flex flex-wrap items-center gap-3 text-sm">
+      {(['today', 'week', 'month'] as TimeRange[]).map((range) => (
         <button
-          onClick={() => handleTimeNavigation('previous')}
-          className='p-2 hover:bg-slate-700 text-gray-400 rounded disabled:opacity-50'
-          disabled={isPending}>
-          {'<'}
+          key={range}
+          onClick={() => handleRangeChange(range)}
+          disabled={isPending}
+          className={`px-3 py-1 rounded text-sm transition-colors ${selectedRange === range
+            ? 'bg-blue-600 text-white'
+            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+        >
+          {t(range)}
         </button>
+      ))}
+      <button
+        onClick={() => handleTimeNavigation('previous')}
+        disabled={isPending}
+        className="px-2 py-1 hover:bg-slate-800 rounded disabled:opacity-50 text-slate-300"
+      >
+        {t('previousRange')}
+      </button>
 
-        <select
-          value={selectedRange}
-          onChange={(e) => handleRangeChange(e.target.value as TimeRange)}
-          className='bg-slate-800 text-slate-300 rounded-md p-2 text-sm'
-          disabled={isPending}>
-          <option value='today'>امروز</option>
-          <option value='week'>هفته جاری</option>
-          <option value='month'>ماه جاری</option>
-        </select>
-
-        <button
-          onClick={() => handleTimeNavigation('next')}
-          className='p-2 hover:bg-slate-700 text-gray-400 rounded disabled:opacity-50'
-          disabled={isPending}>
-          {'>'}
-        </button>
-      </div>
-
-      <div className='text-slate-300 text-sm'>
-        {formatDate(inputStart)} - {formatDate(inputEnd)}
+      <button
+        onClick={() => handleTimeNavigation('next')}
+        disabled={isPending}
+        className="px-2 py-1 hover:bg-slate-800 rounded disabled:opacity-50 text-slate-300"
+      >
+        {t('nextRange')}
+      </button>
+      <div className="text-slate-400 flex items-center gap-1">
+        <time dateTime={inputStart.toISOString()}>{formatDate(inputStart, lang)}</time>
+        <span className="text-slate-500">–</span>
+        <time dateTime={inputEnd.toISOString()}>{formatDate(inputEnd, lang)}</time>
       </div>
     </div>
   );

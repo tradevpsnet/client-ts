@@ -1,26 +1,30 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { EventTypeMap, Importance, ImportanceMap, MultiplierMap, SectorMap, UnitMap } from './list';
+import { Importance } from './list';
 import { ICalendarEvent, ICalendarQueryParams, ICalendarResponse } from '../../../types';
 import React from 'react';
 import { Client } from '../../../client';
 import { ImportanceIndicator } from './importance-indicator';
 import TimeRangeSelector from './time-range';
 import { EventDetailsModal } from './event-detail-modal';
-import MultiSelectFilter from './multi-select-filter';
+import { FiltersSidebar } from './filter-modal';
+import { translations } from './translation';
 
 type IEconomicCalendarProps = {
   width?: string;
   height?: string;
   client: Client;
+  lang?: 'en' | 'fa';
 };
 
 type GroupedEvent = {
   date: string;
   events: ICalendarEvent[];
   formattedDate: string;
+
 };
 
-const EconomicCalendar = ({ width = '400px', height = '550px', client }: IEconomicCalendarProps) => {
+const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'en', }: IEconomicCalendarProps) => {
+  const t = (key: keyof typeof translations) => translations[key][lang];
   const [startDate, setStartDate] = useState<Date>(() => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
@@ -33,8 +37,10 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client }: IEconom
   });
   const [inputStart, setInputStart] = useState<Date>(startDate);
   const [inputEnd, setInputEnd] = useState<Date>(endDate);
-  const [selectedRange, setSelectedRange] = useState('1d');
+  type TimeRange = 'today' | 'week' | 'month';
+  const [selectedRange, setSelectedRange] = useState<TimeRange>('today');
   const [selectedImportance, setSelectedImportance] = useState<number[]>([
+    Importance.NONE,
     Importance.LOW,
     Importance.MODERATE,
     Importance.HIGH
@@ -50,8 +56,6 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client }: IEconom
   const [response, setResponse] = useState<ICalendarResponse | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [openFilter, setOpenFilter] = useState<string | null>(null);
-  const toggleFilter = (name: string) =>
-    setOpenFilter(openFilter === name ? null : name);
 
   const query: ICalendarQueryParams = useMemo(() => {
     const baseQuery = {
@@ -120,29 +124,27 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client }: IEconom
     return () => clearTimeout(timer);
   }, [inputStart, inputEnd]);
 
-  const formatTime = (isoString: string) => {
+  const formatTime = (isoString: string, lang: 'en' | 'fa' = 'en') => {
     const date = new Date(isoString);
-    return date.toLocaleTimeString('fa-IR', {
+    const locale = lang === 'fa' ? 'fa-IR' : 'en-US';
+  
+    return date.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false
+      hour12: false,
     });
   };
-  const resetFilters = () => {
-    setSelectedImportance([Importance.LOW, Importance.MODERATE, Importance.HIGH]);
-    setSelectedUnits([]);
-    setSelectedEvents([]);
-    setSelectedSectors([]);
-    setOpenFilter(null);
+  
+
+  const formatDate = (date: Date, lang: 'en' | 'fa' = 'en') => {
+    const locale = lang === 'fa' ? 'fa-IR' : 'en-US';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
   };
-  const isDefaultFilters =
-    selectedImportance.join() === [Importance.LOW, Importance.MODERATE, Importance.HIGH].join() &&
-    selectedUnits.length === 0 &&
-    selectedEvents.length === 0 &&
-    selectedSectors.length === 0;
-
-
-  const groupEventsByDay = (events: ICalendarEvent[]): GroupedEvent[] => {
+  const groupEventsByDay = (events: ICalendarEvent[], lang: 'en' | 'fa' = 'en'): GroupedEvent[] => {
     const grouped: Record<string, ICalendarEvent[]> = events.reduce((acc, event) => {
       const date = new Date(event.time).toDateString();
       if (!acc[date]) {
@@ -151,229 +153,185 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client }: IEconom
       acc[date].push(event);
       return acc;
     }, {} as Record<string, ICalendarEvent[]>);
-
+  
     return Object.entries(grouped).map(([date, events]) => ({
       date,
       events,
-      formattedDate: new Date(date).toLocaleDateString("fa-IR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
+      formattedDate: formatDate(new Date(date), lang),
     }));
   };
   return (
-    <div className='bg-slate-900 rounded-lg border border-slate-700 shadow-lg overflow-hidden' style={{ width, height }}>
-      {isPending && (
-        <div className='absolute inset-0 bg-slate-900/50 flex items-center justify-center z-50'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' />
-        </div>
-      )}
-      <TimeRangeSelector
-        selectedRange={selectedRange}
-        setSelectedRange={setSelectedRange}
-        inputStart={inputStart}
-        inputEnd={inputEnd}
-        setInputStart={setInputStart}
-        setInputEnd={setInputEnd}
+    <div className="flex gap-4 w-full" style={{ height }}>
+      <FiltersSidebar
+        selectedImportance={selectedImportance}
+        setSelectedImportance={setSelectedImportance}
+        selectedUnits={selectedUnits}
+        setSelectedUnits={setSelectedUnits}
+        selectedEvents={selectedEvents}
+        setSelectedEvents={setSelectedEvents}
+        selectedSectors={selectedSectors}
+        setSelectedSectors={setSelectedSectors}
         isPending={isPending}
+        lang={lang}
       />
-      <div className='p-4 space-y-4' aria-busy={isPending}>
-        <div className='flex gap-2' style={{ opacity: isPending ? 0.5 : 1 }}>
-          {[
-            { label: 'همه', levels: [Importance.LOW, Importance.MODERATE, Importance.HIGH] },
-            { label: ImportanceMap[Importance.HIGH].label, levels: [Importance.HIGH] },
-            { label: ImportanceMap[Importance.MODERATE].label, levels: [Importance.MODERATE] },
-            { label: ImportanceMap[Importance.LOW].label, levels: [Importance.LOW] }
-          ].map((filter) => (
-            <button
-              key={filter.label}
-              onClick={() => setSelectedImportance(filter.levels)}
-              className={`px-3 py-1 rounded-md text-sm ${selectedImportance.join() === filter.levels.join()
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                }`}>
-              {filter.label}
-            </button>
-          ))}
-          {!isDefaultFilters && (
-            <button
-              onClick={resetFilters}
-              className="px-3 py-1 rounded-md text-sm flex items-center gap-1 bg-red-600 text-white hover:bg-red-700"
-              title="بازنشانی فیلترها"
-            >
-              بازنشانی فیلتر ها
-            </button>
-          )}
+      <div className='bg-slate-900 rounded-lg border border-slate-700 shadow-lg overflow-hidden flex-grow' style={{ width, height }}>
+        {isPending && (
+          <div className='absolute inset-0 bg-slate-900/50 flex items-center justify-center z-50'>
+            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500' />
+          </div>
+        )}
+        <div className='p-4 border-b border-slate-700'>
+          {/* Time Range Selector - Updated version */}
+          <div className='flex-1 w-full md:max-w-[600px]'>
+            <TimeRangeSelector
+              selectedRange={selectedRange}
+              setSelectedRange={setSelectedRange}
+              inputStart={inputStart}
+              inputEnd={inputEnd}
+              setInputStart={setInputStart}
+              setInputEnd={setInputEnd}
+              isPending={isPending}
+              lang={lang}
+            />
+          </div>
         </div>
 
-        {/* Calendar Header */}
-        <div className='flex flex-wrap gap-2 mt-4' style={{ opacity: isPending ? 0.5 : 1 }}>
-          <MultiSelectFilter
-            name="unit"
-            label="واحد"
-            options={Object.entries(UnitMap).map(([v, o]) => ({ value: +v, label: o.label }))}
-            selected={selectedUnits}
-            setSelected={setSelectedUnits}
-            isOpen={openFilter === "unit"}
-            onToggle={() => toggleFilter("unit")}
-            onClose={() => setOpenFilter(null)}
-          />
-
-          <MultiSelectFilter
-            name="eventType"
-            label="نوع رویداد"
-            options={Object.entries(EventTypeMap).map(([v, o]) => ({ value: +v, label: o.label }))}
-            selected={selectedEvents}
-            setSelected={setSelectedEvents}
-            isOpen={openFilter === "eventType"}
-            onToggle={() => toggleFilter("eventType")}
-            onClose={() => setOpenFilter(null)}
-          />
-
-          <MultiSelectFilter
-            name="sector"
-            label="بخش"
-            options={Object.entries(SectorMap).map(([v, o]) => ({ value: +v, label: o.label }))}
-            selected={selectedSectors}
-            setSelected={setSelectedSectors}
-            isOpen={openFilter === "sector"}
-            onToggle={() => toggleFilter("sector")}
-            onClose={() => setOpenFilter(null)}
-          />
-        </div>
-      </div>
-      {/* Calendar Body */}
-      <div className='overflow-y-auto' style={{ height: `calc(${height} - 120px)` }}>
-        <table className='w-full'>
-          <thead className='bg-slate-800 text-slate-300 text-xs sticky top-0'>
-            <tr>
-              <th className='p-3 text-right'>زمان</th>
-              <th className='p-3 text-right'>وضعیت</th>
-              <th className='p-3 text-right'>ارز</th>
-              <th className='p-3 text-right'>رویداد</th>
-              <th className='p-3 text-right'>واقعی</th>
-              <th className='p-3 text-right'>پیش‌بینی</th>
-              <th className='p-3 text-right'>قبلی</th>
-              <th className='p-3 text-center'>جزییات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {response?.data?.length ? (
-              groupEventsByDay(response.data).map((dayGroup) => (
-                <React.Fragment key={dayGroup.date}>
-                  {/* Day Header Row */}
-                  <tr className="bg-slate-800/70">
-                    <td colSpan={8} className="p-2 px-4  text-center text-gray-400 text-sm font-medium">
-                      {dayGroup.formattedDate}
-                    </td>
-                  </tr>
-
-                  {/* Events */}
-                  {dayGroup.events.map((event, index) => {
-                    const eventTime = new Date(event.time);
-                    const isPastEvent = eventTime < new Date();
-
-                    return (
-                      <tr
-                        key={event.id}
-                        className={`border-b border-slate-700 hover:bg-slate-800 ${index % 2 === 1 ? 'bg-slate-800/50' : ''
-                          }`}
-                      >
-
-
-                        {/* Time */}
-                        <td className="p-3 text-slate-400 text-sm">
-                          {formatTime(event.time)}
-                        </td>
-                        {/* Status Column */}
-                        <td className="p-3 text-center">
-                          {isPastEvent ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 text-green-500 mx-auto"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          ) : (
-                            <span className="text-slate-500">-</span>
-                          )}
-                        </td>
-                        {/* Currency */}
-                        <td className="p-3">
-                          <div className="flex items-center gap-2 justify-start">
-                            <img
-                              src={event.flag}
-                              alt={event.country}
-                              className="w-5 h-3 rounded-sm"
-                            />
-                            <span className="text-slate-300 text-sm">
-                              {event.currency}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Event Name */}
-                        <td className="p-3 text-slate-200 text-sm text-right">
-                          <div className="flex items-center gap-2 justify-start">
-                            <ImportanceIndicator level={event.importance} />
-                            <span>{event.name}</span>
-                          </div>
-                        </td>
-
-                        {/* Actual */}
-                        <td className="p-3 text-emerald-400 text-sm">
-                          {event.actual || "-"}
-                        </td>
-
-                        {/* Forecast */}
-                        <td className="p-3 text-amber-400 text-sm">
-                          {event.forecast || "-"}
-                        </td>
-
-                        {/* Previous */}
-                        <td className="p-3 text-blue-400 text-sm">
-                          {event.previous || "-"}
-                        </td>
-
-                        {/* Details Button */}
-                        <td className="p-3 text-center">
-                          <button
-                            className="text-slate-300 hover:text-white bg-slate-800/30 hover:bg-green-600/10 items-center mx-auto hover:border-green-600 text-sm flex px-5 py-2 rounded-lg transition-all duration-200"
-                            onClick={() => {
-                              setSelectedEvent(event);
-                              setIsModalOpen(true);
-                            }}
-                          >
-                            اطلاعات بیشتر
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </React.Fragment>
-              ))
-            ) : (
+        {/* Calendar Body */}
+        <div className='overflow-y-auto' style={{ height: `calc(${height} - 120px)` }}>
+          <table className='w-full'>
+            <thead className='bg-slate-800 z-10 text-slate-300 text-xs sticky top-0'>
               <tr>
-                <td colSpan={8} className="p-4 text-center text-slate-500">
-                  رویدادی یافت نشد
-                </td>
+                <th className='p-3 text-right'>{t('time')}</th>
+                <th className='p-3 text-right'>{t('status')}</th>
+                <th className='p-3 text-right'>{t('currency')}</th>
+                <th className='p-3 text-right'>{t('event')}</th>
+                <th className='p-3 text-right'>{t('actual')}</th>
+                <th className='p-3 text-right'>{t('forecast')}</th>
+                <th className='p-3 text-right'>{t('previous')}</th>
+                <th className='p-3 text-center'>{t('details')}</th>
               </tr>
-            )}
-          </tbody>
-        </table>
-        <EventDetailsModal
-          isOpen={!!selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          event={selectedEvent}
-        />
+            </thead>
+            <tbody>
+              {response?.data?.length ? (
+                groupEventsByDay(response.data, lang).map((dayGroup) => (
+                  <React.Fragment key={dayGroup.date}>
+                    {/* Day Header Row */}
+                    <tr className="bg-slate-700 border-t border-b border-slate-600/70">
+                      <td
+                        colSpan={8}
+                        className="p-3 px-4 text-center text-slate-200 text-sm font-semibold tracking-wide bg-slate-800/80 shadow-inner"
+                      >
+                        {dayGroup.formattedDate}
+                      </td>
+                    </tr>
+
+                    {/* Events */}
+                    {dayGroup.events.map((event, index) => {
+                      const eventTime = new Date(event.time);
+                      const isPastEvent = eventTime < new Date();
+
+                      return (
+                        <tr
+                          key={event.id}
+                          className={`border-b border-slate-700 hover:bg-slate-800 ${index % 2 === 1 ? 'bg-slate-800/50' : ''
+                            }`}
+                        >
+
+
+                          {/* Time */}
+                          <td className="p-3 text-slate-400 text-sm">
+                            {formatTime(event.time, lang)}
+                          </td>
+                          {/* Status Column */}
+                          <td className="p-3 text-center">
+                            {isPastEvent ? (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 text-green-500 mx-auto"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ) : (
+                              <span className="text-slate-500">-</span>
+                            )}
+                          </td>
+                          {/* Currency */}
+                          <td className="p-3">
+                            <div className="flex items-center gap-2 justify-start">
+                              <img
+                                src={event.flag}
+                                alt={event.country}
+                                className="w-5 h-3 rounded-sm"
+                              />
+                              <span className="text-slate-300 text-sm">
+                                {event.currency}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Event Name */}
+                          <td className="p-3 text-slate-200 text-sm text-right">
+                            <div className="flex items-center gap-2 justify-start">
+                              <ImportanceIndicator level={event.importance} />
+                              <span>{event.name}</span>
+                            </div>
+                          </td>
+
+                          {/* Actual */}
+                          <td className="p-3 text-emerald-400 text-sm">
+                            {event.actual || "-"}
+                          </td>
+
+                          {/* Forecast */}
+                          <td className="p-3 text-amber-400 text-sm">
+                            {event.forecast || "-"}
+                          </td>
+
+                          {/* Previous */}
+                          <td className="p-3 text-blue-400 text-sm">
+                            {event.previous || "-"}
+                          </td>
+
+                          {/* Details Button */}
+                          <td className="p-3 text-center">
+                            <button
+                              className="text-slate-300 hover:text-white bg-slate-800/30 hover:bg-green-600/10 items-center mx-auto hover:border-green-600 text-sm flex px-5 py-2 rounded-lg transition-all duration-200"
+                              onClick={() => {
+                                setSelectedEvent(event);
+                                setIsModalOpen(true);
+                              }}
+                            >
+                              {t('moreInfo')}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="p-4 text-center text-slate-500">
+                    {t('noEventsFound')}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          <EventDetailsModal
+            isOpen={!!selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            event={selectedEvent}
+          />
+        </div>
       </div>
+
     </div>
   );
 };
