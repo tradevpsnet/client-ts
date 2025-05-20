@@ -14,7 +14,7 @@ type Props = {
 
 export const ImportanceIndicator: React.FC<Props> = ({ level }) => {
   return (
-    <div style={{ fontSize: '14px', color: importanceColors[level] }}>
+    <div className="text-lg" style={{ color: importanceColors[level] }}>
       ★
     </div>
   );

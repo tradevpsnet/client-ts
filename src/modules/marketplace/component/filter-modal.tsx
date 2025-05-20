@@ -112,7 +112,7 @@ export const FiltersSidebar: React.FC<FiltersModalProps> = ({
               value: level,
               label: importanceMap[level].label,
               icon: (
-                <div style={{ fontSize: '14px', color: importanceColors[level] }}>
+                <div className='text-lg' style={{ color: importanceColors[level] }}>
                   ★
                 </div>
               ),
