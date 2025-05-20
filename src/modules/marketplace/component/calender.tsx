@@ -328,6 +328,7 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
             isOpen={!!selectedEvent}
             onClose={() => setSelectedEvent(null)}
             event={selectedEvent}
+            lang={lang}
           />
         </div>
       </div>
