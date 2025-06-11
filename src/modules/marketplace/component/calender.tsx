@@ -14,6 +14,7 @@ type IEconomicCalendarProps = {
   height?: string;
   client: Client;
   lang?: 'en' | 'fa';
+  showFilter?: boolean; 
 };
 
 type GroupedEvent = {
@@ -23,8 +24,9 @@ type GroupedEvent = {
 
 };
 
-const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'en', }: IEconomicCalendarProps) => {
+const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'en',  showFilter = true }: IEconomicCalendarProps) => {
   const t = (key: keyof typeof translations) => translations[key][lang];
+
   const [startDate, setStartDate] = useState<Date>(() => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
@@ -162,6 +164,7 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
   };
   return (
     <div className="flex gap-4 w-full"   dir={lang === 'fa' ? 'rtl' : 'ltr'} style={{ height }}>
+      {showFilter && 
       <FiltersSidebar
         selectedImportance={selectedImportance}
         setSelectedImportance={setSelectedImportance}
@@ -174,6 +177,7 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
         isPending={isPending}
         lang={lang}
       />
+      }
       <div className='bg-slate-900 rounded-lg border border-slate-700 shadow-lg overflow-hidden flex-grow' style={{ width, height }}>
         {isPending && (
           <div className='absolute inset-0 bg-slate-900/50 flex items-center justify-center z-50'>
