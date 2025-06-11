@@ -14,7 +14,7 @@ type IEconomicCalendarProps = {
   height?: string;
   client: Client;
   lang?: 'en' | 'fa';
-  showFilter?: boolean; 
+  showFilter?: boolean;
 };
 
 type GroupedEvent = {
@@ -24,8 +24,16 @@ type GroupedEvent = {
 
 };
 
-const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'en',  showFilter = true }: IEconomicCalendarProps) => {
+const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'en', showFilter = true }: IEconomicCalendarProps) => {
   const t = (key: keyof typeof translations) => translations[key][lang];
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const [startDate, setStartDate] = useState<Date>(() => {
     const date = new Date();
@@ -57,7 +65,8 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [response, setResponse] = useState<ICalendarResponse | null>(null);
   const [isPending, setIsPending] = useState(false);
-  const [openFilter, setOpenFilter] = useState<string | null>(null);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const toggleFilterModal = () => setIsFilterModalOpen(prev => !prev);
 
   const query: ICalendarQueryParams = useMemo(() => {
     const baseQuery = {
@@ -129,14 +138,14 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
   const formatTime = (isoString: string, lang: 'en' | 'fa' = 'en') => {
     const date = new Date(isoString);
     const locale = lang === 'fa' ? 'fa-IR' : 'en-US';
-  
+
     return date.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
     });
   };
-  
+
 
   const formatDate = (date: Date, lang: 'en' | 'fa' = 'en') => {
     const locale = lang === 'fa' ? 'fa-IR' : 'en-US';
@@ -155,7 +164,7 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
       acc[date].push(event);
       return acc;
     }, {} as Record<string, ICalendarEvent[]>);
-  
+
     return Object.entries(grouped).map(([date, events]) => ({
       date,
       events,
@@ -163,21 +172,46 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
     }));
   };
   return (
-    <div className="flex gap-4 w-full"   dir={lang === 'fa' ? 'rtl' : 'ltr'} style={{ height }}>
-      {showFilter && 
-      <FiltersSidebar
-        selectedImportance={selectedImportance}
-        setSelectedImportance={setSelectedImportance}
-        selectedUnits={selectedUnits}
-        setSelectedUnits={setSelectedUnits}
-        selectedEvents={selectedEvents}
-        setSelectedEvents={setSelectedEvents}
-        selectedSectors={selectedSectors}
-        setSelectedSectors={setSelectedSectors}
-        isPending={isPending}
-        lang={lang}
-      />
-      }
+    <div className="flex gap-4 w-full" dir={lang === 'fa' ? 'rtl' : 'ltr'} style={{ height }}>
+      {showFilter && !isMobile && (
+        <FiltersSidebar
+          selectedImportance={selectedImportance}
+          setSelectedImportance={setSelectedImportance}
+          selectedUnits={selectedUnits}
+          setSelectedUnits={setSelectedUnits}
+          selectedEvents={selectedEvents}
+          setSelectedEvents={setSelectedEvents}
+          selectedSectors={selectedSectors}
+          setSelectedSectors={setSelectedSectors}
+          isPending={isPending}
+          lang={lang}
+        />
+      )}
+      {isMobile && isFilterModalOpen && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+          <div className="bg-slate-800 p-4 rounded-lg w-[90%] max-h-[90vh] overflow-y-auto relative">
+            <button
+              onClick={toggleFilterModal}
+              className="absolute top-2 right-2 text-white text-xl"
+            >
+              ×
+            </button>
+            <FiltersSidebar
+              selectedImportance={selectedImportance}
+              setSelectedImportance={setSelectedImportance}
+              selectedUnits={selectedUnits}
+              setSelectedUnits={setSelectedUnits}
+              selectedEvents={selectedEvents}
+              setSelectedEvents={setSelectedEvents}
+              selectedSectors={selectedSectors}
+              setSelectedSectors={setSelectedSectors}
+              isPending={isPending}
+              lang={lang}
+            />
+          </div>
+        </div>
+      )}
+
       <div className='bg-slate-900 rounded-lg border border-slate-700 shadow-lg overflow-hidden flex-grow' style={{ width, height }}>
         {isPending && (
           <div className='absolute inset-0 bg-slate-900/50 flex items-center justify-center z-50'>
@@ -186,17 +220,36 @@ const EconomicCalendar = ({ width = '400px', height = '550px', client, lang = 'e
         )}
         <div className='p-4 border-b border-slate-700'>
           {/* Time Range Selector - Updated version */}
-          <div className='flex-1 w-full md:max-w-[600px]'>
-            <TimeRangeSelector
-              selectedRange={selectedRange}
-              setSelectedRange={setSelectedRange}
-              inputStart={inputStart}
-              inputEnd={inputEnd}
-              setInputStart={setInputStart}
-              setInputEnd={setInputEnd}
-              isPending={isPending}
-              lang={lang}
-            />
+          <div className='flex flex-row flex-wrap gap-4 items-center w-full max-w-[600px]'>
+            <div className='flex-1 min-w-[200px]'>
+              <TimeRangeSelector
+                selectedRange={selectedRange}
+                setSelectedRange={setSelectedRange}
+                inputStart={inputStart}
+                inputEnd={inputEnd}
+                setInputStart={setInputStart}
+                setInputEnd={setInputEnd}
+                isPending={isPending}
+                lang={lang}
+              />
+            </div>
+            {isMobile && showFilter && (
+              <div className='shrink-0'>
+                <button
+                  onClick={toggleFilterModal}
+                  style={{
+                    backgroundColor: '#1e40af',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '8px 16px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {t('showFilters')}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

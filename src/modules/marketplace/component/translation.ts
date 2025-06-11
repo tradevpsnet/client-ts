@@ -22,4 +22,6 @@ export const translations = {
 
   moreInfo: { en: 'More info', fa: 'اطلاعات بیشتر' },
   noEventsFound: { en: 'No events found', fa: 'رویدادی یافت نشد' },
+  showFilters: {en: 'Filters', fa: ' فیلتر ها'},
+  close: {en: 'Close', fa: 'بستن'}
 };

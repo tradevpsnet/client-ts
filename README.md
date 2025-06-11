@@ -80,7 +80,7 @@ const EconomicCalendarPage: React.FC = () => {
 
   return (
     <div className='w-full h-screen overflow-hidden'>
-      <EconomicCalendar client={client} width='100%' height='100%' />
+      <EconomicCalendar client={client} width='100%' height='100%' showFilter={false}/>
     </div>
   );
 };
