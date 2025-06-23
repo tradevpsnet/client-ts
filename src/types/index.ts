@@ -23,6 +23,7 @@ export { IServerDeployResponse } from './windows/server-deploy';
 export { IServerDetailResponse } from './windows/server-detail';
 export { IServerListQueryParams } from './windows/servers-list';
 export { IListServersResponse } from './windows/servers-list';
+export { IServerChangePasswordResponse } from './windows/change-password';
 export { IProjectCreateParams } from './projects/project-deploy';
 export { IProjectCreateResponse } from './projects/project-deploy';
 export { IProjectListQueryParams } from './projects/projects-list';
