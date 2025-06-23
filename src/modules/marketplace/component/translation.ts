@@ -1,0 +1,25 @@
+export const translations = {
+  filtersTitle: { en: 'Filters', fa: 'فیلترها' },
+  reset: { en: 'Reset', fa: 'بازنشانی' },
+  importance: { en: 'Importance', fa: 'اهمیت' },
+  unit: { en: 'Unit', fa: 'واحد' },
+  eventType: { en: 'Event Type', fa: 'نوع رویداد' },
+  sector: { en: 'Sector', fa: 'بخش' },
+  today: { en: 'Today', fa: 'امروز' },
+  week: { en: 'Week', fa: 'هفته' },
+  month: { en: 'Month', fa: 'ماه' },
+  previousRange: { en: 'Previous range', fa: 'بازه قبلی' },
+  nextRange: { en: 'Next range', fa: 'بازه بعدی' },
+
+  time: { en: 'Time', fa: 'زمان' },
+  status: { en: 'Status', fa: 'وضعیت' },
+  currency: { en: 'Currency', fa: 'ارز' },
+  event: { en: 'Event', fa: 'رویداد' },
+  actual: { en: 'Actual', fa: 'واقعی' },
+  forecast: { en: 'Forecast', fa: 'پیش‌بینی' },
+  previous: { en: 'Previous', fa: 'قبلی' },
+  details: { en: 'Details', fa: 'جزییات' },
+
+  moreInfo: { en: 'More info', fa: 'اطلاعات بیشتر' },
+  noEventsFound: { en: 'No events found', fa: 'رویدادی یافت نشد' },
+};
