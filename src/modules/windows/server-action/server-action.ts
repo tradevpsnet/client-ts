@@ -16,7 +16,7 @@ export class ServerAction {
     try {
       const response = await this.windows.client._request({
         method: 'POST',
-        endpoint: `/my/trading/windows-servers/${serverId}/action`,
+        endpoint: `/my/trading/windows-servers/actions/${serverId}`,
         data: params,
       });
 
