@@ -1,4 +1,5 @@
 import { Client } from "../../client";
+import { IServerChangePasswordParams } from "../../types/windows/change-password";
 import { IServerActionParams } from "../../types/windows/server-action";
 import { IServerDeployParams } from "../../types/windows/server-deploy";
 import { IServerListQueryParams } from "../../types/windows/servers-list";
@@ -37,7 +38,7 @@ export class Windows {
     return new ServersList(this).execute(query);
   }
 
-  async server_change_password(serverId: string) {
-    return new ServerChangePassword(this).execute(serverId);
+  async server_change_password(serverId: string, params: IServerChangePasswordParams) {
+    return new ServerChangePassword(this).execute(serverId, params);
   }
 }

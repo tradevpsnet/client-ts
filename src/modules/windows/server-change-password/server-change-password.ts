@@ -1,4 +1,4 @@
-import type { IServerChangePasswordResponse } from '../../../types/windows/change-password';
+import type { IServerChangePasswordParams, IServerChangePasswordResponse } from '../../../types/windows/change-password';
 import {
   ServerChangePasswordError,
   ServerChangePasswordNotFoundError,
@@ -12,11 +12,12 @@ import { APIError } from '../../exception';
 export class ServerChangePassword {
   constructor(private windows: Windows) {}
 
-  async execute(serverId: string): Promise<IServerChangePasswordResponse> {
+  async execute(serverId: string, params: IServerChangePasswordParams): Promise<IServerChangePasswordResponse> {
     try {
       const response = await this.windows.client._request({
         method: 'POST',
         endpoint: `/my/trading/windows-servers/change-password/${serverId}`,
+        data: params,
       });
 
       if (!response?.ok) {

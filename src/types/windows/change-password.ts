@@ -3,3 +3,9 @@ export type IServerChangePasswordResponse = {
   msg: string;
   data: string;
 }
+
+
+export type IServerChangePasswordParams = {
+  account_password: string;
+  new_password: string;
+}
